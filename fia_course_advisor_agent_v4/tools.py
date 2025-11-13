@@ -18,7 +18,7 @@ print("Created store:", store_name)
 
 # Upload and index your file
 # Use absolute path to avoid path resolution issues
-local_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "documents",  "course-selector-opt1.xlsx"))
+local_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "documents",  "course-selector-opt2.xlsx"))
 operation = client.file_search_stores.upload_to_file_search_store(
     file=local_path,
     file_search_store_name=store_name,
