@@ -4,8 +4,8 @@ from vertexai.preview import rag
 from httpx import AsyncClient
 
 # Configuration variables
-CORPUS_NAME = f"course-selector-opt2"
-RAG_CORPUS = f"projects/buoyant-purpose-475203-t9/locations/asia-southeast1/ragCorpora/2227030015734710272"
+CORPUS_NAME = f"fia-role-based-learning-pathways"
+RAG_CORPUS = f"projects/buoyant-purpose-475203-t9/locations/us-east4/ragCorpora/4611686018427387904"
 DEFAULT_TOP_K = 10
 DEFAULT_VECTOR_DISTANCE_THRESHOLD = 0.6
 
