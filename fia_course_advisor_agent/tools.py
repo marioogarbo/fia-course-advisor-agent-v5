@@ -1,13 +1,15 @@
 import os
 from typing import Dict, Any
+from google.adk.tools.retrieval.vertex_ai_rag_retrieval import VertexAiRagRetrieval
 from vertexai.preview import rag
 from httpx import AsyncClient
 
+from dotenv import load_dotenv
+load_dotenv(override=True)
+
 # Configuration variables
-CORPUS_NAME = f"course-selector-opt1"
-RAG_CORPUS = f"projects/buoyant-purpose-475203-t9/locations/asia-southeast1/ragCorpora/5685794529555251200"
-DEFAULT_TOP_K = 10
-DEFAULT_VECTOR_DISTANCE_THRESHOLD = 0.6
+CORPUS_NAME = f"course-selector-opt3"
+RAG_CORPUS = f"projects/buoyant-purpose-475203-t9/locations/asia-southeast1/ragCorpora/7991637538768945152"
 
 
 async def send_zoho_email(path_variables: Dict[str, Any], body: Dict[str, Any]) -> Dict[str, Any]:
@@ -61,66 +63,19 @@ async def send_zoho_email(path_variables: Dict[str, Any], body: Dict[str, Any]) 
     except Exception as e:
         return {"error": f"Failed to call MCP server: {str(e)}"}
 
-def rag_query(query: str) -> Dict[str, Any]:
-    """
-    Query a Vertex AI RAG corpus with a user question and return relevant information.
-
-    Args:
-        query (str): The text query to search for in the corpus
-
-    Returns:
-        dict: The query results and status
-    """
-    try:
-        # Perform the query
-        response = rag.retrieval_query(
-            rag_resources=[
-                rag.RagResource(
-                    rag_corpus=RAG_CORPUS
-                )
-            ],
-            text=query,
-            rag_retrieval_config=rag.RagRetrievalConfig(
-                top_k=DEFAULT_TOP_K,
-                filter=rag.Filter(vector_distance_threshold=DEFAULT_VECTOR_DISTANCE_THRESHOLD),
-            ),
+rag_query = VertexAiRagRetrieval(
+    name='retrieve_rag_documentation',
+    description=(
+        'Use this tool to retrieve documentation and reference materials for the question from the RAG corpus,'
+    ),
+    rag_resources=[
+        rag.RagResource(
+            # please fill in your own rag corpus
+            # here is a sample rag corpus for testing purpose
+            # e.g. projects/123/locations/us-central1/ragCorpora/456
+            rag_corpus=RAG_CORPUS,
         )
-
-        # Process the response into a more usable format
-        results = []
-        if hasattr(response, "contexts") and response.contexts:
-            for ctx_group in response.contexts.contexts:
-                result = {
-                    "text": ctx_group.text if hasattr(ctx_group, "text") else "",
-                    "score": ctx_group.score if hasattr(ctx_group, "score") else 0.0,
-                }
-                results.append(result)
-
-        # If we didn't find any results
-        if not results:
-            return {
-                "status": "warning",
-                "message": f"No results found in corpus '{CORPUS_NAME}' for query: '{query}'",
-                "query": query,
-                "corpus_name": CORPUS_NAME,
-                "results": [],
-                "results_count": 0,
-            }
-
-        return {
-            "status": "success",
-            "message": f"Successfully queried corpus '{CORPUS_NAME}'",
-            "query": query,
-            "corpus_name": CORPUS_NAME,
-            "results": results,
-            "results_count": len(results),
-        }
-
-    except Exception as e:
-        error_msg = f"Error querying corpus: {str(e)}"
-        return {
-            "status": "error",
-            "message": error_msg,
-            "query": query,
-            "corpus_name": CORPUS_NAME,
-        }
+    ],
+    similarity_top_k=10,
+    vector_distance_threshold=0.6,
+)
